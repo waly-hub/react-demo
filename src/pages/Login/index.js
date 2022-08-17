@@ -1,9 +1,16 @@
-import { Card, Button, Checkbox, Form, Input } from 'antd'
+import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 import logo from '@/assets/logo.png'
 import './index.scss'
+import useSotre from '@/store'
+import { useNavigate } from 'react-router-dom'
 const Login = () => {
-  const onFinish = (values) => {
-    console.log('Success:', values)
+  const store = useSotre()
+  const navigate = useNavigate()
+  const { loginStore } = store
+  const onFinish = async (values) => {
+    const { mobile, code } = values
+    await loginStore.login(mobile, code)
+    navigate('/')
   }
   return (
     <div className="login">
@@ -25,12 +32,12 @@ const Login = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Username"
-            name="username"
+            label="手机号"
+            name="mobile"
             rules={[
               {
                 required: true,
-                message: 'Please input your username!',
+                message: '请输入账号!',
               },
             ]}
           >
@@ -38,12 +45,12 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item
-            label="Password"
-            name="password"
+            label="密码"
+            name="code"
             rules={[
               {
                 required: true,
-                message: 'Please input your password!',
+                message: '请输入密码!',
               },
             ]}
           >
@@ -68,7 +75,7 @@ const Login = () => {
             }}
           >
             <Button type="primary" htmlType="submit">
-              Submit
+              登录
             </Button>
           </Form.Item>
         </Form>
