@@ -5,9 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import 'antd/dist/antd.css'
 import './index.scss'
 ReactDOM.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <App />
   ,
   document.getElementById('root')
 )

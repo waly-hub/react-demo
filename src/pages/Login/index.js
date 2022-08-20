@@ -1,10 +1,10 @@
 import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 import logo from '@/assets/logo.png'
 import './index.scss'
-import useSotre from '@/store'
+import useStore from '@/store'
 import { useNavigate } from 'react-router-dom'
 const Login = () => {
-  const store = useSotre()
+  const store = useStore()
   const navigate = useNavigate()
   const { loginStore } = store
   const onFinish = async (values) => {
@@ -27,6 +27,8 @@ const Login = () => {
           }}
           initialValues={{
             remember: true,
+            mobile: '13811111111',
+            code: "246810"
           }}
           onFinish={onFinish}
           autoComplete="off"
