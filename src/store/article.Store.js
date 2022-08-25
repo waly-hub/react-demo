@@ -1,5 +1,6 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { http } from '@/utils'
+import { message } from 'antd'
 class ActicleStore {
   articleList = []
   channelList = []
@@ -10,13 +11,24 @@ class ActicleStore {
 
   getChannelList = async () => {
     const res = await http.get('/channels')
-    this.channelList = res.data.channels
+    runInAction(() => {
+      this.channelList = res.data.channels
+
+    })
   }
 
   getArticleDataList = async (params) => {
     const res = await http.get('/mp/articles', { params })
-    this.articleList = res.data.results
-    this.articleTotal = res.data.total_count
+    runInAction(() => {
+      this.articleList = res.data.results
+      this.articleTotal = res.data.total_count
+    })
+
+  }
+
+  delAtrticleById = async (id) => {
+    const res = await http.delete(`/mp/articles/${id}`)
+    message.success(res.message)
   }
 }
 

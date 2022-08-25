@@ -7,7 +7,9 @@ import {
   Select,
   DatePicker,
   Table,
-  Space
+  Space,
+  Tag,
+  Popconfirm
 } from 'antd'
 import React from 'react'
 import useSotre from '@/store'
@@ -17,6 +19,7 @@ import moment from 'moment'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import img404 from '@/assets/error.png'
 import uuid from 'react-uuid'
+import { useNavigate } from 'react-router-dom'
 const { Option } = Select
 const { RangePicker } = DatePicker
 const formItemLayout = {
@@ -29,7 +32,7 @@ const formItemLayout = {
 }
 const typeList = [
   {
-    value: null,
+    value: -1,
     name: '全部',
     id: -1
   },
@@ -66,23 +69,56 @@ const App = () => {
     page: 1,
     per_page: 10
   })
+  const onFinish = (values) => {
+    const { status, channel, date } = values
+    const _params = {}
+    if (status) {
+      _params.status = status
+    }
+    if (channel) {
+      _params.channel = channel
+    }
+    if (date) {
+      _params.begin_pubdate = date[0].format('YYYY-MM-DD')
+      _params.end_pubdate = date[1].format('YYYY-MM-DD')
+    }
+    console.log('_params', _params)
+    setParams({
+      ...params,
+      ..._params
+    })
+  }
+
   useEffect(() => {
     articleStore.getArticleDataList(params)
   }, [params])
 
-  const onFinish = (values) => {
-    console.log('Received values of form: ', values)
+
+  const formatStatus = (type) => {
+    return type === 1 ? <Tag color="red">审核失败</Tag> : <Tag color="green">审核通过</Tag>
   }
   const handleTypeChange = (value) => {
     console.log('handleTypeChange', value)
   }
 
+
+  const navigate = useNavigate()
   const goPublish = (data) => {
     console.log('---', data)
+    navigate(`/publish?id=${data.id}`)
   }
 
-  const delArticle = (data) => {
-    console.log('---', data)
+  const pageChange = (page, pageSize) => {
+    console.log(page, pageSize)
+    setParams({
+      ...params,
+      page,
+      per_page: pageSize
+    })
+  }
+  const confirm = async (id) => {
+    await articleStore.delAtrticleById(id)
+    await articleStore.getArticleDataList()
   }
 
   const columns = [
@@ -99,11 +135,11 @@ const App = () => {
       dataIndex: 'title',
       width: 220
     },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   render: data => formatStatus(data)
-    // },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      render: data => formatStatus(data)
+    },
     {
       title: '发布时间',
       dataIndex: 'pubdate'
@@ -125,18 +161,26 @@ const App = () => {
       render: data => {
         return (
           <Space size="middle">
+
             <Button
               type="primary"
               shape="circle"
               icon={<EditOutlined />}
               onClick={() => goPublish(data)} />
-            <Button
-              type="primary"
-              danger
-              shape="circle"
-              icon={<DeleteOutlined />}
-              onClick={() => delArticle(data)}
-            />
+            <Popconfirm
+              title="确定删除吗？"
+              onConfirm={() => confirm(data.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button
+                type="primary"
+                danger
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
+
           </Space>
         )
       },
@@ -191,7 +235,19 @@ const App = () => {
           </Button>
         </Form.Item>
       </Form>
-      <Table dataSource={articleStore.articleList} columns={columns} bordered rowKey={item => item.id} />
+      <Table
+        dataSource={articleStore.articleList}
+        columns={columns} bordered
+        rowKey={item => item.id}
+        pagination={{
+          total: articleStore.articleTotal,
+          pageSizeOptions: ['5', '10', '15'],
+          current: params.page,
+          pageSize: params.per_page,
+          onChange: pageChange,
+          showSizeChanger: true,
+        }}
+      />
     </>
 
   )
