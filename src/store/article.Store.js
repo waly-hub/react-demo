@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { http } from '@/utils'
 import { message } from 'antd'
+import { getChannelList } from '@/apis'
 class ActicleStore {
   articleList = []
   channelList = []
@@ -10,7 +11,7 @@ class ActicleStore {
   }
 
   getChannelList = async () => {
-    const res = await http.get('/channels')
+    const res = await getChannelList()
     runInAction(() => {
       this.channelList = res.data.channels
 
